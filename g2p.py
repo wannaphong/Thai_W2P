@@ -158,7 +158,7 @@ class G2p(object):
         # steps
         
         for word in words:
-            print(word)
+            #print(word)
             if not any(letter in word for letter in self.graphemes):
                 pron = [word]
 
