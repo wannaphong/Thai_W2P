@@ -9,8 +9,15 @@ Code base from [AzamRabiee/Persian_G2P](https://github.com/AzamRabiee/Persian_G2
 Dataset License: <img src="http://i.creativecommons.org/p/mark/1.0/88x31.png"
      style="border-style: none;" alt="Public Domain Mark" />
 
+Google Colab: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1LXbXg2tJv5KkTWFv3hqmsCJk0g0PU6ea?usp=sharing)
+
 ## usage
 
+with word segment (many words)
 ```python
 python3 g2p.py --text "เป็นไลบรารีภาษาไพทอนสำหรับประมวลผลภาษาธรรมชาติ"
+```
+with one word (not word segment)
+```python
+python3 g2p.py --text "คนดี" --wordcut n
 ```
