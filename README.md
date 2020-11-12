@@ -12,6 +12,10 @@ Dataset License: <img src="http://i.creativecommons.org/p/mark/1.0/88x31.png"
 Google Colab: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1LXbXg2tJv5KkTWFv3hqmsCJk0g0PU6ea?usp=sharing)
 
 ## usage
+**Install requirements**
+```
+pip3 install -r requirements.txt
+```
 
 with word segment (many words)
 ```python
