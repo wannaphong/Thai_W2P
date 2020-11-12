@@ -6,7 +6,7 @@ Thai Grapheme-to-Phoneme (G2P) converter
 
 Code base from [AzamRabiee/Persian_G2P](https://github.com/AzamRabiee/Persian_G2P)
 
-Dataset License: <img src="http://i.creativecommons.org/p/mark/1.0/88x31.png"
+Dataset License (file: data.csv) : <img src="http://i.creativecommons.org/p/mark/1.0/88x31.png"
      style="border-style: none;" alt="Public Domain Mark" />
 
 Google Colab: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1LXbXg2tJv5KkTWFv3hqmsCJk0g0PU6ea?usp=sharing)
@@ -24,4 +24,8 @@ python3 g2p.py --text "เป็นไลบรารีภาษาไพทอ
 with one word (not word segment)
 ```python
 python3 g2p.py --text "คนดี" --wordcut n
+```
+**Train**
+```
+python3 train.py --name run
 ```
