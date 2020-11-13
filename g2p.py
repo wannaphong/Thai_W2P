@@ -10,6 +10,7 @@ import codecs
 import os
 import re
 from builtins import str as unicode
+import pythainlp
 from hparams import hp
 from data_feeder import load_vocab
 from ssg import syllable_tokenize
@@ -142,7 +143,7 @@ class G2p(object):
         # tokenization
         prons = []
         if self.wordcut:
-            words = syllable_tokenize(text)
+            words = pythainlp.word_tokenize(text)
         else:
             word = text
             if not any(letter in word for letter in self.graphemes):

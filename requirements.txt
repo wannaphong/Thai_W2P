@@ -1,4 +1,5 @@
 numpy
 Distance
 torch
+pythainlp
 ssg
