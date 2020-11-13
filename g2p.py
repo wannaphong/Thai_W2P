@@ -10,9 +10,9 @@ import codecs
 import os
 import re
 from builtins import str as unicode
-import pythainlp
 from hparams import hp
 from data_feeder import load_vocab
+from ssg import syllable_tokenize
 
 dirname = os.path.dirname(__file__)
 
@@ -142,7 +142,7 @@ class G2p(object):
         # tokenization
         prons = []
         if self.wordcut:
-            words = pythainlp.word_tokenize(text)
+            words = syllable_tokenize(text)
         else:
             word = text
             if not any(letter in word for letter in self.graphemes):
