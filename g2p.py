@@ -180,7 +180,7 @@ class G2p(object):
         return prons#[:-1]
 
 TEXT = "แมว"
-CHECKPOINT = 'logs-run/checkpoint-best.npy'
+CHECKPOINT = 'logs-run/checkpoint.npy'
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
