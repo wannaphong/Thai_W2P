@@ -13,7 +13,7 @@ def load_vocab():
     idx2p = {idx: p for idx, p in enumerate(hp.phonemes)}
     return g2idx, idx2g, p2idx, idx2p  # note that g and p mean grapheme and phoneme, respectively.
 
-def prepare_data(dictionary):
+def prepare_data(dictionary,test=False):
     # Tihu persian dictionary
     lexicon_dic = {}
     with open(dictionary) as f:
@@ -30,6 +30,8 @@ def prepare_data(dictionary):
     shuffle(indices)
     words = [words[idx] for idx in indices]
     prons = [prons[idx] for idx in indices]
+    if test==False:
+        return train_words, eval_words, train_prons, eval_prons
     num_train, num_test = int(len(words) * .8), int(len(words) * .1)
     train_words, eval_words, test_words = words[:num_train], \
                                           words[num_train:-num_test], \
