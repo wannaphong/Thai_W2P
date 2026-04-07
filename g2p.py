@@ -13,8 +13,6 @@ from builtins import str as unicode
 import pythainlp
 from hparams import hp
 from data_feeder import load_vocab
-from ssg import syllable_tokenize
-
 dirname = os.path.dirname(__file__)
 
 def construct_homograph_dictionary():
@@ -181,13 +179,108 @@ class G2p(object):
 
 TEXT = "แมว"
 CHECKPOINT = 'logs-run/checkpoint.npy'
+ENCODER_ONNX = os.path.join(dirname, 'thai_w2p_encoder.onnx')
+DECODER_ONNX = os.path.join(dirname, 'thai_w2p_decoder.onnx')
+
+
+class G2pONNX(object):
+    """Grapheme-to-Phoneme converter using ONNX Runtime for inference.
+
+    This class loads two ONNX models (encoder and decoder) that were exported
+    from the trained PyTorch checkpoint via ``convert_to_onnx.py``.  It
+    provides the same public interface as :class:`G2p` but does **not** require
+    PyTorch at runtime – only ``onnxruntime`` and ``numpy``.
+    """
+
+    def __init__(self, args):
+        super().__init__()
+        import onnxruntime as ort
+
+        self.graphemes = hp.graphemes
+        self.phonemes = hp.phonemes
+        self.g2idx, self.idx2g, self.p2idx, self.idx2p = load_vocab()
+        self.wordcut = args.wordcut == 'y'
+
+        encoder_path = getattr(args, 'encoder_onnx', ENCODER_ONNX)
+        decoder_path = getattr(args, 'decoder_onnx', DECODER_ONNX)
+
+        self.enc_sess = ort.InferenceSession(encoder_path)
+        self.dec_sess = ort.InferenceSession(decoder_path)
+
+        self.tihu = {' ': ' '}
+
+    def predict(self, word):
+        # Encode input word as a sequence of grapheme indices
+        chars = list(word) + ['</s>']
+        x = [self.g2idx.get(c, self.g2idx['<unk>']) for c in chars]
+        x = np.array([x], dtype=np.int64)          # (1, seq_len)
+
+        # Run encoder
+        last_hidden = self.enc_sess.run(None, {'x': x})[0]  # (1, hidden)
+        h = last_hidden.reshape(1, 1, -1).astype(np.float32)  # (1,1,hidden)
+
+        # Run decoder autoregressively
+        token = np.array([[self.p2idx['<s>']]], dtype=np.int64)  # (1, 1)
+        preds = []
+        for _ in range(20):
+            logits, h = self.dec_sess.run(None, {'token': token, 'h': h})
+            pred = int(logits[0, 0].argmax())
+            if pred == self.p2idx['</s>']:
+                break
+            preds.append(pred)
+            token = np.array([[pred]], dtype=np.int64)
+
+        return [self.idx2p.get(idx, '<unk>') for idx in preds]
+
+    def __call__(self, text):
+        text = unicode(text)
+        prons = []
+        if self.wordcut:
+            words = pythainlp.word_tokenize(text)
+        else:
+            word = text
+            if not any(letter in word for letter in self.graphemes):
+                pron = [word]
+            else:
+                pron = self.predict(word)
+            prons.extend(pron)
+            prons.extend([' '])
+            return prons
+
+        for word in words:
+            if not any(letter in word for letter in self.graphemes):
+                pron = [word]
+            elif word in self.tihu:
+                pron = self.tihu[word]
+            else:
+                pron = self.predict(word)
+            prons.extend(pron)
+            prons.extend([' '])
+
+        return prons
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--text', default=TEXT, help='the input character sequence')
     parser.add_argument('--checkpoint', default=CHECKPOINT, help='the input character sequence')
     parser.add_argument('--wordcut', default='y', help='the input character sequence')
+    parser.add_argument(
+        '--onnx', action='store_true',
+        help='use ONNX Runtime for inference instead of the numpy backend',
+    )
+    parser.add_argument(
+        '--encoder_onnx', default=ENCODER_ONNX,
+        help='path to the encoder ONNX model (used when --onnx is set)',
+    )
+    parser.add_argument(
+        '--decoder_onnx', default=DECODER_ONNX,
+        help='path to the decoder ONNX model (used when --onnx is set)',
+    )
     args = parser.parse_args()
-    g2p = G2p(args)
+    if args.onnx:
+        g2p = G2pONNX(args)
+    else:
+        g2p = G2p(args)
     out = g2p(args.text)
     print("".join(symbol for symbol in out))

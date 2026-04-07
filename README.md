@@ -25,6 +25,22 @@ with one word (not word segment)
 ```python
 python3 g2p.py --text "คนดี" --wordcut n
 ```
+
+### ONNX Inference (onnxruntime)
+
+Pre-built ONNX models are included in the repository (`thai_w2p_encoder.onnx` and
+`thai_w2p_decoder.onnx`).  Use them with the `--onnx` flag – no PyTorch required
+at inference time:
+
+```python
+python3 g2p.py --text "คนดี" --wordcut n --onnx
+```
+
+To regenerate the ONNX models from the numpy checkpoint:
+```
+python3 convert_to_onnx.py
+```
+
 **Train**
 ```
 python3 train.py --name run

@@ -3,3 +3,4 @@ Distance
 torch
 pythainlp
 ssg
+onnxruntime
